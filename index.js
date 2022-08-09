@@ -6,14 +6,18 @@
 
 //const { ethers } = require("ethers")
 import { ethers } from "./ethers-5.6.esm.min.js"
-import { raffleAddress, raffleABI, mockUSDCAddress, mockUSDCABI } from "./constants.js"
+import { lottoGameAddress, lottoGameABI, mockUSDCAddress, mockUSDCABI } from "./constants.js"
 
 const connectButton = document.getElementById("connectButton")
+const approveButton = document.getElementById("approveButton")
+const getAllowanceButton = document.getElementById("getAllowanceButton")
 const betButton = document.getElementById("betButton")
 const requestButton = document.getElementById("requestRandomWordsButton")
 const balanceButton = document.getElementById("getBalanceButton")
 
 connectButton.onclick = connect
+approveButton.onclick = approve
+getAllowanceButton.onclick = getAllowance
 betButton.onclick = bet
 requestButton.onclick = requestRandomWords
 balanceButton.onclick = getBalance
@@ -38,6 +42,48 @@ async function connect() {
     }
 }
 
+async function approve() {
+    let approveAmount = document.getElementById("approveAmount").value
+    approveAmount *= 10 ** 6
+    console.log(approveAmount)
+    approveAmount = ethers.BigNumber.from(approveAmount)
+    console.log(approveAmount)
+    if (typeof window.ethereum !== "undefined") {
+        // connect to the blockchain through metamask (window.ethereum)
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        // assign signer as the metamask wallet
+        const signer = provider.getSigner()
+        console.log(signer)
+        // get contract
+        const contract = new ethers.Contract(mockUSDCAddress, mockUSDCABI, signer)
+        console.log("Got contract")
+        // make transactions
+        try {
+            const txResponse = await contract.approve(
+                lottoGameAddress,
+                approveAmount
+            )
+            console.log("Tx sent:")
+            console.log(txResponse)
+            // wait for tx to finish
+            await listenForTransactionMined(txResponse, provider)
+            console.log("Done!")
+        } catch (e) {
+            console.log(e)
+        }
+    }
+}
+
+async function getAllowance() {
+    if (typeof window.ethereum != "undefined") {
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        const signer = provider.getSigner()
+        const mockUSDC = new ethers.Contract(mockUSDCAddress, mockUSDCABI, signer)
+        const allowance = await mockUSDC.allowance(signer.getAddress(), lottoGameAddress)
+        console.log(allowance.div(10**6).toString())
+    }
+}
+
 async function bet() {
     let usdcAmount = document.getElementById("usdcAmount").value
     usdcAmount *= 10 ** 6
@@ -51,7 +97,7 @@ async function bet() {
         const signer = provider.getSigner()
         console.log(signer)
         // get contract
-        const contract = new ethers.Contract(raffleAddress, raffleABI, signer)
+        const contract = new ethers.Contract(lottoGameAddress, lottoGameABI, signer)
         console.log("Got contract")
         // make transactions
         try {
@@ -88,7 +134,7 @@ async function getBalance() {
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         const signer = provider.getSigner()
         const mockUSDC = new ethers.Contract(mockUSDCAddress, mockUSDCABI, signer)
-        const balance = await mockUSDC.balanceOf(raffleAddress)
+        const balance = await mockUSDC.balanceOf(lottoGameAddress)
         console.log(balance.div(10**6).toString())
     }
 }
@@ -99,7 +145,7 @@ async function requestRandomWords() {
         console.log("Requesting...")
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         const signer = provider.getSigner()
-        const contract = new ethers.Contract(raffleAddress, raffleABI, signer)
+        const contract = new ethers.Contract(lottoGameAddress, lottoGameABI, signer)
         try {
             const txResponse = await contract.requestRandomWords()
             await listenForTransactionMined(txResponse, provider)
