@@ -1,7 +1,7 @@
 # LottoGame-HTML
 Frontend for the OllieM26/LottoGame repository
 
-Currently uses the LottoGame contract deployed on avalanche fuji testnet at address 0x5c089Df16179f5125075C3F4B6988C37643065c6
+Currently uses the LottoGame contract deployed on avalanche fuji testnet at address 0x5c089Df16179f5125075C3F4B6988C37643065c6.
 Uses a mock USDC token for betting (0x727c9B4C6EC121C65709528AD5094B4F0A17f8f4)
 
 ![image](https://user-images.githubusercontent.com/107412855/183887761-e84e3738-e180-4df9-beb7-ed27fbde4aa3.png)
